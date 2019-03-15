@@ -102,8 +102,7 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     public static final String BROADCAST_ACTION = "com.maya.video.actions";
 
     private ArrayList<RemoteAction> actions;
-    private final PictureInPictureParams.Builder pictureInPictureParamsBuilder =
-            new PictureInPictureParams.Builder();
+
 
     private BroadcastReceiver receiver;
     private static final int REQUEST_CODE = 101;
@@ -204,26 +203,33 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     }
 
     //Piture in Picture Process
-    public void setAction(boolean isPlay) {
-        actions = new ArrayList<>();
-        Intent actionIntent = new Intent(BROADCAST_ACTION);
-        pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, actionIntent, 0);
-        final Icon icon;
-        if (isPlay)
-            icon = Icon.createWithResource(this, R.drawable.ic_pause_24dp);
-        else
-            icon = Icon.createWithResource(this, R.drawable.ic_play_arrow_24dp);
-        RemoteAction remoteAction = new RemoteAction(icon, "play", "playVideo", pendingIntent);
-        actions.add(remoteAction);
-        createPipAction();
+    public void setAction(boolean isPlay)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            actions = new ArrayList<>();
+            Intent actionIntent = new Intent(BROADCAST_ACTION);
+            pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, actionIntent, 0);
+            final Icon icon;
+            if (isPlay)
+                icon = Icon.createWithResource(this, R.drawable.ic_pause_24dp);
+            else
+                icon = Icon.createWithResource(this, R.drawable.ic_play_arrow_24dp);
+            RemoteAction remoteAction = new RemoteAction(icon, "play", "playVideo", pendingIntent);
+            actions.add(remoteAction);
+            createPipAction();
+        }
     }
 
 
     @Override
     public void onUserLeaveHint() {
-        if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-            if (!isInPictureInPictureMode()) {
-                enterPictureInPictureMode(pictureInPictureParamsBuilder.build());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
+                if (!isInPictureInPictureMode()) {
+                    PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+                    enterPictureInPictureMode(pictureInPictureParamsBuilder.build());
+                }
             }
         }
     }
@@ -231,49 +237,50 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     @Override
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
                                               Configuration newConfig) {
-        if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-            if (isInPictureInPictureMode) {
-                final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                mediaFragment.playerView.setVisibility(View.VISIBLE);
 
-                // action
-                IntentFilter filter = new IntentFilter();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
+                if (isInPictureInPictureMode) {
+                    final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                    mediaFragment.playerView.setVisibility(View.VISIBLE);
+
+                    // action
+                    IntentFilter filter = new IntentFilter();
 
 
-                filter.addAction(BROADCAST_ACTION);
-                receiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent)
-                    {
-                        boolean isPlay = mediaFragment.player.getPlayWhenReady();
-                        if(mediaFragment.isConnected())
-                        {
-                           isPlay = true;
-                           mediaFragment.showUSBAlert();
-                        }
-
-                        if (isPlay) {
-                            setAction(false);
-                            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-                                VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                                mediaFragment.playVideo(false);
+                    filter.addAction(BROADCAST_ACTION);
+                    receiver = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            boolean isPlay = mediaFragment.player.getPlayWhenReady();
+                            if (mediaFragment.isConnected()) {
+                                isPlay = true;
+                                mediaFragment.showUSBAlert();
                             }
-                        } else {
-                            setAction(true);
-                            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-                                VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                                mediaFragment.playVideo(true);
+
+                            if (isPlay) {
+                                setAction(false);
+                                if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
+                                    VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                                    mediaFragment.playVideo(false);
+                                }
+                            } else {
+                                setAction(true);
+                                if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
+                                    VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                                    mediaFragment.playVideo(true);
+                                }
                             }
                         }
+                    };
+                    registerReceiver(receiver, filter);
+
+                } else {
+                    VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                    mediaFragment.backToNormal();
+                    if (receiver != null) {
+                        unregisterReceiver(receiver);
                     }
-                };
-                registerReceiver(receiver, filter);
-
-            } else {
-                VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                mediaFragment.backToNormal();
-                if (receiver != null) {
-                    unregisterReceiver(receiver);
                 }
             }
         }
@@ -285,12 +292,13 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     }
 
     private void createPipAction() {
-
-        PictureInPictureParams params =
-                new PictureInPictureParams.Builder()
-                        .setActions(actions)
-                        .build();
-        setPictureInPictureParams(params);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PictureInPictureParams params =
+                    new PictureInPictureParams.Builder()
+                            .setActions(actions)
+                            .build();
+            setPictureInPictureParams(params);
+        }
     }
 
 
