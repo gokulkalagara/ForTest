@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.TextView;
 
 import com.maya.testfrost.R;
@@ -38,7 +39,7 @@ public class Utility
         }
     }
 
-    public static void showSnackBar(Context activity, CoordinatorLayout coordinatorLayout, String text, int type) {
+    public static void showSnackBar(Context activity, View coordinatorLayout, String text, int type) {
         if (coordinatorLayout == null || text == null || activity == null) {
             return;
         }

@@ -94,6 +94,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     private FrameLayout.LayoutParams params;
     private MediaReceiver mediaReceiver;
     private UsbDetectorReceiver usbDetectorReceiver;
+    private boolean isRetry = false;
     public static IHeadSetsController iHeadSetsController;
 
 
@@ -151,7 +152,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        fragmentBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_video_player,container,false);
+        fragmentBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_video_player, container, false);
 
 
         setUp();
@@ -189,7 +190,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         shouldAutoPlay = true;
         window = new Timeline.Window();
 
-        fragmentBinding.playerView.findViewById(R.id.imgClose).setOnClickListener(v -> 
+        fragmentBinding.playerView.findViewById(R.id.imgClose).setOnClickListener(v ->
         {
             releasePlayer();
             activity().onBackPressed();
@@ -197,9 +198,8 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
 
         fragmentBinding.playerView.findViewById(R.id.imgResize).setOnClickListener(v ->
         {
-            if (fragmentBinding.playerView != null)
-            {
-                ((ImageView)fragmentBinding.playerView.findViewById(R.id.imgResize)).setImageResource(activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? R.drawable.exo_controls_fullscreen_enter : R.drawable.exo_controls_fullscreen_exit);
+            if (fragmentBinding.playerView != null) {
+                ((ImageView) fragmentBinding.playerView.findViewById(R.id.imgResize)).setImageResource(activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? R.drawable.exo_controls_fullscreen_enter : R.drawable.exo_controls_fullscreen_exit);
                 fragmentBinding.frameLayout.setLayoutParams(new FrameLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         (activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                 ? LinearLayout.LayoutParams.MATCH_PARENT : Utility.getScreenWidth(activity()) / 3)));
@@ -214,8 +214,6 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         });
 
 
-
-
         fragmentBinding.playerView.findViewById(R.id.imgSettings).setOnClickListener(v -> {
             BSDVideoActionFragment.newInstance(playBackSpeed, this).show(getChildFragmentManager(), "BSDVideoActionFragment");
         });
@@ -223,8 +221,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
 
         fragmentBinding.playerView.findViewById(R.id.imgMin).setOnClickListener(v ->
         {
-            if (fragmentBinding.playerView != null)
-            {
+            if (fragmentBinding.playerView != null) {
                 if (videoPlayerStage == VideoPlayerStage.STABLE) {
                     FrameLayout.LayoutParams params1 = new FrameLayout.LayoutParams(Utility.getScreenWidth(activity()) / 2, Utility.dpSize(activity(), 100));
                     params1.setMargins(Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15));
@@ -246,6 +243,14 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             }
         });
 
+        fragmentBinding.llRetry.setVisibility(View.GONE);
+        fragmentBinding.tvAction.setOnClickListener(v ->
+        {
+            isRetry = true;
+            initializePlayer();
+            fragmentBinding.llRetry.setVisibility(View.GONE);
+        });
+
 
     }
 
@@ -255,11 +260,14 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             return;
         }
 
-        if (player != null) {
+        if (player != null && !isRetry)
+        {
             return;
         }
+        isRetry = false;
+        fragmentBinding.progressBar.setVisibility(View.VISIBLE);
         fragmentBinding.playerView.requestFocus();
-
+        fragmentBinding.playerView.setUseController(true);
         TrackSelection.Factory videoTrackSelectionFactory =
                 new AdaptiveTrackSelection.Factory();
 
@@ -305,8 +313,10 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             }
 
             @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                switch (playbackState) {
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState)
+            {
+                switch (playbackState)
+                {
                     case Player.STATE_IDLE:
                         fragmentBinding.progressBar.setVisibility(View.GONE);
                         break;
@@ -315,11 +325,12 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                         break;
                     case Player.STATE_READY:
                         fragmentBinding.progressBar.setVisibility(View.GONE);
-                        if (player.getPlayWhenReady()) {
-                            mAudioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-                        }
-                        if (isConnected())
+                        if (player.getPlayWhenReady())
                         {
+                            mAudioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+                            mAudioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_SYSTEM, AudioManager.AUDIOFOCUS_GAIN);
+                        }
+                        if (isConnected()) {
                             shouldAutoPlay = false;
                             player.setPlayWhenReady(false);
                             showUSBAlert();
@@ -328,6 +339,10 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                         break;
                     case Player.STATE_ENDED:
                         fragmentBinding.progressBar.setVisibility(View.GONE);
+                        if (videoPlayerStage == VideoPlayerStage.PIP)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                ((MainActivity) activity()).setAction(false);
+                            }
                         break;
 
                 }
@@ -344,8 +359,15 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             }
 
             @Override
-            public void onPlayerError(ExoPlaybackException error) {
-
+            public void onPlayerError(ExoPlaybackException error)
+            {
+                error.printStackTrace();
+                Log.d("ERROR",error.getMessage());
+                playbackPosition = player.getCurrentPosition();
+                currentWindow = player.getCurrentWindowIndex();
+                fragmentBinding.progressBar.setVisibility(View.GONE);
+                fragmentBinding.playerView.setUseController(false);
+                fragmentBinding.llRetry.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -360,7 +382,6 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
 
             @Override
             public void onSeekProcessed() {
-
             }
         });
 
@@ -437,8 +458,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         }
     }
 
-    public void negativeActionPlayer()
-    {
+    public void negativeActionPlayer() {
 
     }
 
@@ -464,8 +484,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
         fragmentBinding.playerView.setUseController(true);
 
@@ -474,7 +493,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         }
         if (videoPlayerStage == VideoPlayerStage.PIP)
         {
-            backToNormal();
+            //backToNormal();
         }
         mAudioManager.registerMediaButtonEventReceiver(mRemoteControlResponder);
         activity().registerReceiver(mediaReceiver = new MediaReceiver(), new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
@@ -492,12 +511,19 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
 
         } else {
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            // updating the control's
+            playbackPosition = player.getCurrentPosition();
+            currentWindow = player.getCurrentWindowIndex();
+
+            if (Util.SDK_INT <= 23)
             {
-               backToPIP();
-            } else if (Util.SDK_INT <= 23) {
                 releasePlayer();
-            } else {
+            }
+            else if(Util.SDK_INT >= Build.VERSION_CODES.O)
+            {
+
+            }
+            else {
                 shouldAutoPlay = false;
                 player.setPlayWhenReady(false);
             }
@@ -516,27 +542,18 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
     @Override
-    public void onStop() {
+    public void onStop()
+    {
         super.onStop();
         if (player == null) {
 
         }
         else
         {
-            if (videoPlayerStage == VideoPlayerStage.PIP)
-            {
-                videoPlayerStage = previousPlayerStage;
-                backToNormal();
-            }
-
-            shouldAutoPlay = false;
-            player.setPlayWhenReady(false);
-
-
+            pausePlayer();
             if (Util.SDK_INT <= 23) {
                 releasePlayer();
             }
-
         }
 
     }
@@ -554,7 +571,9 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
     @Override
-    public void showSnackBar(String snackBarText, int type) {
+    public void showSnackBar(String snackBarText, int type)
+    {
+        Utility.showSnackBar(activity(),fragmentBinding.frameLayout,snackBarText,type);
     }
 
     @Override
@@ -563,16 +582,15 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
 
-    public void backToNormal() {
+    public void backToNormal()
+    {
         videoPlayerStage = previousPlayerStage;
         fragmentBinding.frameLayout.setLayoutParams(params);
         decorateScreenUi();
     }
 
-    public void backToPIP()
-    {
-        if (alertUsbDialog != null && alertUsbDialog.isShowing())
-        {
+    public void backToPIP() {
+        if (alertUsbDialog != null && alertUsbDialog.isShowing()) {
             alertUsbDialog.dismiss();
         }
         ((MainActivity) activity()).setAction(player.getPlayWhenReady());
@@ -605,8 +623,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                 RelativeLayout.LayoutParams minParams = new RelativeLayout.LayoutParams(Utility.dpSize(activity(), 24), Utility.dpSize(activity(), 24));
                 minParams.setMargins(Utility.dpSize(activity(), 10), Utility.dpSize(activity(), 10), Utility.dpSize(activity(), 10), Utility.dpSize(activity(), 10));
                 fragmentBinding.playerView.findViewById(R.id.imgMin).setLayoutParams(minParams);
-                fragmentBinding.playerView.findViewById(R.id.imgMin).setPadding(10, 10, 10, 10);
-                ((ImageView)fragmentBinding.playerView.findViewById(R.id.imgMin)).setImageResource(R.drawable.ic_min_view);
+                ((ImageView) fragmentBinding.playerView.findViewById(R.id.imgMin)).setImageResource(R.drawable.ic_min_view);
 
 
                 minParams = new RelativeLayout.LayoutParams(Utility.dpSize(activity(), 24), Utility.dpSize(activity(), 24));
@@ -667,11 +684,10 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
 
                 fragmentBinding.playerView.findViewById(R.id.imgMin).setVisibility(View.VISIBLE);
 
-                RelativeLayout.LayoutParams minParams1 = new RelativeLayout.LayoutParams(Utility.dpSize(activity(), 20), Utility.dpSize(activity(), 20));
+                RelativeLayout.LayoutParams minParams1 = new RelativeLayout.LayoutParams(Utility.dpSize(activity(), 24), Utility.dpSize(activity(), 24));
                 minParams1.setMargins(Utility.dpSize(activity(), 7), Utility.dpSize(activity(), 7), Utility.dpSize(activity(), 7), Utility.dpSize(activity(), 7));
                 fragmentBinding.playerView.findViewById(R.id.imgMin).setLayoutParams(minParams1);
-                fragmentBinding.playerView.findViewById(R.id.imgMin).setPadding(10, 10, 10, 10);
-                ((ImageView)fragmentBinding.playerView.findViewById(R.id.imgMin)).setImageResource(R.drawable.ic_stable_view);
+                ((ImageView) fragmentBinding.playerView.findViewById(R.id.imgMin)).setImageResource(R.drawable.ic_stable_view);
 
                 fragmentBinding.playerView.findViewById(R.id.exo_progress).setVisibility(View.VISIBLE);
 
@@ -793,13 +809,10 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
 
-
-    public class UsbDetectorReceiver extends BroadcastReceiver
-    {
+    public class UsbDetectorReceiver extends BroadcastReceiver {
 
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
+        public void onReceive(Context context, Intent intent) {
            /* if (intent.getExtras().getBoolean("connected")) {
                 if (playerView != null) {
                     shouldAutoPlay = false;
@@ -833,27 +846,26 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
     private AudioManager.OnAudioFocusChangeListener focusChangeListener =
-        focusChange ->
-        {
-            switch (focusChange) {
+            focusChange ->
+            {
+                switch (focusChange) {
+                    case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK):
 
-                case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK):
+                        break;
+                    case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT):
+                        break;
 
-                    break;
-                case (AudioManager.AUDIOFOCUS_LOSS_TRANSIENT):
-                    break;
+                    case (AudioManager.AUDIOFOCUS_LOSS):
+                        //for pause
+                        pausePlayer();
+                        break;
 
-                case (AudioManager.AUDIOFOCUS_LOSS):
-                    //for pause
-                    pausePlayer();
-                    break;
+                    case (AudioManager.AUDIOFOCUS_GAIN):
+                        //for play
+                        playPlayer();
+                        break;
 
-                case (AudioManager.AUDIOFOCUS_GAIN):
-                    //for play
-                    playPlayer();
-                    break;
-
-            }
-        };
+                }
+            };
 
 }

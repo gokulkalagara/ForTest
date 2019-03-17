@@ -118,8 +118,7 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
         //decorateUi();
 
@@ -144,8 +143,7 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     }
 
 
-    private void setFullScreen()
-    {
+    private void setFullScreen() {
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -197,10 +195,8 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     }
 
     //Piture in Picture Process
-    public void setAction(boolean isPlay)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
+    public void setAction(boolean isPlay) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             actions = new ArrayList<>();
             Intent actionIntent = new Intent(BROADCAST_ACTION);
             pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, actionIntent, 0);
@@ -220,10 +216,18 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     public void onUserLeaveHint() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-                if (!isInPictureInPictureMode()) {
+            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment)
+            {
+                if (!isInPictureInPictureMode())
+                {
+                    VideoPlayerFragment videoPlayerFragment = (VideoPlayerFragment)  getSupportFragmentManager().getFragments().get(0);
+                    videoPlayerFragment.backToPIP();
                     PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
                     enterPictureInPictureMode(pictureInPictureParamsBuilder.build());
+                }
+                else
+                {
+
                 }
             }
         }
@@ -235,17 +239,21 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-                if (isInPictureInPictureMode) {
-                    final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                if (isInPictureInPictureMode)
+                {
 
+                    final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                    if(mediaFragment.player==null) return;
+                    setAction(mediaFragment.player.getPlayWhenReady());
                     // action
                     IntentFilter filter = new IntentFilter();
-
-
                     filter.addAction(BROADCAST_ACTION);
                     receiver = new BroadcastReceiver() {
                         @Override
-                        public void onReceive(Context context, Intent intent) {
+                        public void onReceive(Context context, Intent intent)
+                        {
+                            if(mediaFragment.player==null) return;
+
                             boolean isPlay = mediaFragment.player.getPlayWhenReady();
                             if (mediaFragment.isConnected()) {
                                 isPlay = true;
@@ -269,13 +277,10 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
                     };
                     registerReceiver(receiver, filter);
 
-                }
-                else
-                {
+                } else {
                     VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
                     mediaFragment.backToNormal();
-                    if (receiver != null)
-                    {
+                    if (receiver != null) {
                         unregisterReceiver(receiver);
                     }
                 }
@@ -288,10 +293,8 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
         super.onPause();
     }
 
-    private void createPipAction()
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
+    private void createPipAction() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             PictureInPictureParams params =
                     new PictureInPictureParams.Builder()
                             .setActions(actions)
@@ -312,7 +315,8 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
         changeTitle("Root View");
 
-        playVideo("https://dlkteeygs75wb.cloudfront.net/2580fe71-2455-4aef-b66b-e841dc35dd3d/hls/ds.m3u8");
+        //playVideo("https://dlkteeygs75wb.cloudfront.net/2580fe71-2455-4aef-b66b-e841dc35dd3d/hls/ds.m3u8");
+        playVideo("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4");
 
 
         //addVideoPlayer();
