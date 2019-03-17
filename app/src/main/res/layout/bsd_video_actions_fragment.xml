@@ -1,234 +1,251 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <data class="BSDVideoActionFragmentBinding">
 
-    <LinearLayout
-        android:gravity="center"
+    </data>
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:layout_weight="1"
-            android:padding="15dp"
-            android:textSize="15sp"
-            android:textColor="@color/black"
-            android:textAllCaps="true"
-            android:text="Change PlayBack Speed"
+
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <ImageView
-            android:tint="@color/gray"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:src="@drawable/ic_slow_motion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-   <android.support.design.chip.ChipGroup
-       android:id="@+id/cgSpeed"
-       android:layout_margin="15dp"
-       app:chipSpacingHorizontal="15dp"
-       app:chipSpacingVertical="15dp"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content">
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp1"
-           android:text="0.25 x"
-           app:chipIconVisible="false"
-           android:textColor="@color/black"
-           app:chipCornerRadius="30dp"
-           app:chipIcon="@drawable/ic_check_circle"
-           app:chipBackgroundColor="@color/app_background_color"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp2"
-           android:text="0.5 x"
-           app:chipIconVisible="false"
-           app:chipCornerRadius="30dp"
-           app:chipIcon="@drawable/ic_check_circle"
-           android:textColor="@color/black"
-           app:chipBackgroundColor="@color/app_background_color"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp3"
-           android:text="0.75 x"
-           app:chipIconVisible="false"
-           app:chipIcon="@drawable/ic_check_circle"
-           app:chipCornerRadius="30dp"
-           android:textColor="@color/black"
-           app:chipBackgroundColor="@color/app_background_color"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp4"
-           app:chipIcon="@drawable/ic_check_circle"
-           android:text="Normal"
-           app:chipCornerRadius="30dp"
-           android:textColor="@color/colorPrimary"
-           app:chipBackgroundColor="@color/light_color_primary"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp5"
-           android:text="1.25 x"
-           app:chipIconVisible="false"
-           app:chipIcon="@drawable/ic_check_circle"
-           app:chipCornerRadius="30dp"
-           android:textColor="@color/black"
-           app:chipBackgroundColor="@color/app_background_color"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp6"
-           android:text="1.5 x"
-           app:chipIconVisible="false"
-           app:chipIcon="@drawable/ic_check_circle"
-           app:chipCornerRadius="30dp"
-           android:textColor="@color/black"
-           app:chipBackgroundColor="@color/app_background_color"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp7"
-           android:text="1.75 x"
-           app:chipIconVisible="false"
-           app:chipIcon="@drawable/ic_check_circle"
-           app:chipCornerRadius="30dp"
-           android:textColor="@color/black"
-           app:chipBackgroundColor="@color/app_background_color"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-
-       <android.support.design.chip.Chip
-           android:id="@+id/chipSp8"
-           android:text="2 x"
-           app:chipIconVisible="false"
-           app:chipIcon="@drawable/ic_check_circle"
-           android:textColor="@color/black"
-           app:chipBackgroundColor="@color/app_background_color"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="@color/white">
 
 
-   </android.support.design.chip.ChipGroup>
+            <LinearLayout
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-    <View
-        android:background="@color/app_background_color"
-        android:layout_width="match_parent"
-        android:layout_height="1dp">
+                <TextView
+                    android:layout_weight="1"
+                    android:padding="15dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/black"
+                    android:textAllCaps="true"
+                    android:text="Change PlayBack Speed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-    </View>
+                <ImageView
+                    android:tint="@color/gray"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:src="@drawable/ic_slow_motion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <android.support.design.chip.ChipGroup
+                android:id="@+id/cgSpeed"
+                android:layout_margin="15dp"
+                app:chipSpacingHorizontal="15dp"
+                app:chipSpacingVertical="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp1"
+                    android:text="0.25 x"
+                    app:chipIconVisible="false"
+                    android:textColor="@color/black"
+                    app:chipCornerRadius="30dp"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp2"
+                    android:text="0.5 x"
+                    app:chipIconVisible="false"
+                    app:chipCornerRadius="30dp"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp3"
+                    android:text="0.75 x"
+                    app:chipIconVisible="false"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp4"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    android:text="Normal"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/colorPrimary"
+                    app:chipBackgroundColor="@color/light_color_primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp5"
+                    android:text="1.25 x"
+                    app:chipIconVisible="false"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp6"
+                    android:text="1.5 x"
+                    app:chipIconVisible="false"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp7"
+                    android:text="1.75 x"
+                    app:chipIconVisible="false"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipSp8"
+                    android:text="2 x"
+                    app:chipIconVisible="false"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
 
-    <LinearLayout
-        android:gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+            </android.support.design.chip.ChipGroup>
 
-        <TextView
-            android:layout_weight="1"
-            android:textColor="@color/black"
-            android:textAllCaps="true"
-            android:padding="15dp"
-            android:textSize="15sp"
-            android:text="Change Quality"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <View
+                android:background="@color/app_background_color"
+                android:layout_width="match_parent"
+                android:layout_height="1dp">
 
-        <ImageView
-            android:tint="@color/gray"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:src="@drawable/ic_equalizer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <android.support.design.chip.ChipGroup
-        android:id="@+id/cgQuality"
-        android:layout_margin="15dp"
-        app:chipSpacingHorizontal="15dp"
-        app:chipSpacingVertical="15dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <android.support.design.chip.Chip
-            android:id="@+id/chipQ1"
-            android:text="Auto"
-            app:chipIcon="@drawable/ic_check_circle"
-            app:chipCornerRadius="30dp"
-            android:textColor="@color/colorPrimary"
-            app:chipBackgroundColor="@color/light_color_primary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <android.support.design.chip.Chip
-            android:id="@+id/chipQ2"
-            android:text="1080p"
-            app:chipCornerRadius="30dp"
-            android:textColor="@color/black"
-            app:chipBackgroundColor="@color/app_background_color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <android.support.design.chip.Chip
-            android:id="@+id/chipQ3"
-            android:text="720p"
-            app:chipCornerRadius="30dp"
-            android:textColor="@color/black"
-            app:chipBackgroundColor="@color/app_background_color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            </View>
 
 
-        <android.support.design.chip.Chip
-            android:text="480p"
-            app:chipCornerRadius="30dp"
-            android:textColor="@color/black"
-            app:chipBackgroundColor="@color/app_background_color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <LinearLayout
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <android.support.design.chip.Chip
-            android:text="360p"
-            app:chipCornerRadius="30dp"
-            android:textColor="@color/black"
-            app:chipBackgroundColor="@color/app_background_color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_weight="1"
+                    android:textColor="@color/black"
+                    android:textAllCaps="true"
+                    android:padding="15dp"
+                    android:textSize="15sp"
+                    android:text="Change Quality"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-        <android.support.design.chip.Chip
-            android:text="240p"
-            app:chipCornerRadius="30dp"
-            android:textColor="@color/black"
-            app:chipBackgroundColor="@color/app_background_color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+                <ImageView
+                    android:tint="@color/gray"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:src="@drawable/ic_equalizer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
-        <android.support.design.chip.Chip
-            android:text="144p"
-            app:chipCornerRadius="30dp"
-            android:textColor="@color/black"
-            app:chipBackgroundColor="@color/app_background_color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <android.support.design.chip.ChipGroup
+                android:id="@+id/cgQuality"
+                android:layout_margin="15dp"
+                app:chipSpacingHorizontal="15dp"
+                app:chipSpacingVertical="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-    </android.support.design.chip.ChipGroup>
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipQ1"
+                    android:text="Auto"
+                    app:chipIcon="@drawable/ic_check_circle"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/colorPrimary"
+                    app:chipBackgroundColor="@color/light_color_primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-</LinearLayout>
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipQ2"
+                    android:text="1080p"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:id="@+id/chipQ3"
+                    android:text="720p"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+
+                <android.support.design.chip.Chip
+                    android:text="480p"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:text="360p"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:text="240p"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.chip.Chip
+                    android:text="144p"
+                    app:chipCornerRadius="30dp"
+                    android:textColor="@color/black"
+                    app:chipBackgroundColor="@color/app_background_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </android.support.design.chip.ChipGroup>
+
+        </LinearLayout>
+
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</layout>

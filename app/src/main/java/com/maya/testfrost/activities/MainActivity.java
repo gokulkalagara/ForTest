@@ -13,22 +13,18 @@ import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.view.menu.MenuAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Rational;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -50,21 +46,17 @@ import com.maya.testfrost.network.retrofit2.AppRetrofitAdapter;
 import com.maya.testfrost.services.IVideoService;
 import com.maya.testfrost.utils.Utility;
 
-import org.json.JSONArray;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-@RequiresApi(api = Build.VERSION_CODES.O)
 public class MainActivity extends AppCompatActivity implements IActivity, IRootAdapter {
 
 
@@ -105,11 +97,10 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
 
     private BroadcastReceiver receiver;
+
     private static final int REQUEST_CODE = 101;
-    private static final int REQUEST_INFO = 3;
 
     PendingIntent pendingIntent;
-    private boolean isPlay = true;
 
 
     @Override
@@ -127,14 +118,16 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         //decorateUi();
-        if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-            VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-            mediaFragment.playerView.setUseController(true);
-            mediaFragment.onResume();
-        }
+
+//        if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
+//            VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+//            mediaFragment.playerView.setUseController(true);
+//            mediaFragment.onResume();
+//        }
     }
 
 
@@ -151,7 +144,8 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     }
 
 
-    private void setFullScreen() {
+    private void setFullScreen()
+    {
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -198,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
             recyclerView.setAdapter(rootAdapter = new RootAdapter(treeList = Utility.generateTrees(), activity(), this));
         }, 200);
 
-        setAction(isPlay);
+        setAction(true);
 
     }
 
@@ -224,7 +218,8 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
     @Override
     public void onUserLeaveHint() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
             if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
                 if (!isInPictureInPictureMode()) {
                     PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
@@ -235,14 +230,13 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     }
 
     @Override
-    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
-                                              Configuration newConfig) {
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
             if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
                 if (isInPictureInPictureMode) {
                     final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                    mediaFragment.playerView.setVisibility(View.VISIBLE);
 
                     // action
                     IntentFilter filter = new IntentFilter();
@@ -262,23 +256,26 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
                                 setAction(false);
                                 if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
                                     VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                                    mediaFragment.playVideo(false);
+                                    mediaFragment.pausePlayer();
                                 }
                             } else {
                                 setAction(true);
                                 if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
                                     VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                                    mediaFragment.playVideo(true);
+                                    mediaFragment.playPlayer();
                                 }
                             }
                         }
                     };
                     registerReceiver(receiver, filter);
 
-                } else {
+                }
+                else
+                {
                     VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
                     mediaFragment.backToNormal();
-                    if (receiver != null) {
+                    if (receiver != null)
+                    {
                         unregisterReceiver(receiver);
                     }
                 }
@@ -291,8 +288,10 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
         super.onPause();
     }
 
-    private void createPipAction() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    private void createPipAction()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
             PictureInPictureParams params =
                     new PictureInPictureParams.Builder()
                             .setActions(actions)
