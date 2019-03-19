@@ -29,7 +29,8 @@ public class HeadSetActionReceiver extends BroadcastReceiver {
         if(event.getKeyCode() ==  KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
         {
             Log.d(TAG_MEDIA,"MEDIA PLAY PAUSE");
-            VideoPlayerFragment.iHeadSetsController.applyAction();
+            if(VideoPlayerFragment.iHeadSetsController!=null)
+                VideoPlayerFragment.iHeadSetsController.applyAction();
             return;
         }
 
@@ -37,7 +38,8 @@ public class HeadSetActionReceiver extends BroadcastReceiver {
         {
             Log.d(TAG_MEDIA,"MEDIA HEADSETHOOK");
             if(counter%2==0)
-            VideoPlayerFragment.iHeadSetsController.applyAction();
+            if(VideoPlayerFragment.iHeadSetsController!=null)
+                VideoPlayerFragment.iHeadSetsController.applyAction();
             return;
         }
     }

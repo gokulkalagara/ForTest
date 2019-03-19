@@ -13,22 +13,18 @@ import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.view.menu.MenuAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Rational;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -50,21 +46,17 @@ import com.maya.testfrost.network.retrofit2.AppRetrofitAdapter;
 import com.maya.testfrost.services.IVideoService;
 import com.maya.testfrost.utils.Utility;
 
-import org.json.JSONArray;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-@RequiresApi(api = Build.VERSION_CODES.O)
 public class MainActivity extends AppCompatActivity implements IActivity, IRootAdapter {
 
 
@@ -105,11 +97,10 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
 
     private BroadcastReceiver receiver;
+
     private static final int REQUEST_CODE = 101;
-    private static final int REQUEST_INFO = 3;
 
     PendingIntent pendingIntent;
-    private boolean isPlay = true;
 
 
     @Override
@@ -130,11 +121,12 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     protected void onResume() {
         super.onResume();
         //decorateUi();
-        if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-            VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-            mediaFragment.playerView.setUseController(true);
-            mediaFragment.onResume();
-        }
+
+//        if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
+//            VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+//            mediaFragment.playerView.setUseController(true);
+//            mediaFragment.onResume();
+//        }
     }
 
 
@@ -198,15 +190,13 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
             recyclerView.setAdapter(rootAdapter = new RootAdapter(treeList = Utility.generateTrees(), activity(), this));
         }, 200);
 
-        setAction(isPlay);
+        setAction(true);
 
     }
 
     //Piture in Picture Process
-    public void setAction(boolean isPlay)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
+    public void setAction(boolean isPlay) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             actions = new ArrayList<>();
             Intent actionIntent = new Intent(BROADCAST_ACTION);
             pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, actionIntent, 0);
@@ -224,34 +214,46 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
     @Override
     public void onUserLeaveHint() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-                if (!isInPictureInPictureMode()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment)
+            {
+                if (!isInPictureInPictureMode())
+                {
+                    VideoPlayerFragment videoPlayerFragment = (VideoPlayerFragment)  getSupportFragmentManager().getFragments().get(0);
+                    videoPlayerFragment.backToPIP();
                     PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
                     enterPictureInPictureMode(pictureInPictureParamsBuilder.build());
+                }
+                else
+                {
+
                 }
             }
         }
     }
 
     @Override
-    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
-                                              Configuration newConfig) {
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
             if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
-                if (isInPictureInPictureMode) {
-                    final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                    mediaFragment.playerView.setVisibility(View.VISIBLE);
+                if (isInPictureInPictureMode)
+                {
 
+                    final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                    if(mediaFragment.player==null) return;
+                    setAction(mediaFragment.player.getPlayWhenReady());
                     // action
                     IntentFilter filter = new IntentFilter();
-
-
                     filter.addAction(BROADCAST_ACTION);
                     receiver = new BroadcastReceiver() {
                         @Override
-                        public void onReceive(Context context, Intent intent) {
+                        public void onReceive(Context context, Intent intent)
+                        {
+                            if(mediaFragment.player==null) return;
+
                             boolean isPlay = mediaFragment.player.getPlayWhenReady();
                             if (mediaFragment.isConnected()) {
                                 isPlay = true;
@@ -262,13 +264,13 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
                                 setAction(false);
                                 if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
                                     VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                                    mediaFragment.playVideo(false);
+                                    mediaFragment.pausePlayer();
                                 }
                             } else {
                                 setAction(true);
                                 if (getSupportFragmentManager().getFragments().get(0) instanceof VideoPlayerFragment) {
                                     VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
-                                    mediaFragment.playVideo(true);
+                                    mediaFragment.playPlayer();
                                 }
                             }
                         }
@@ -313,7 +315,8 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
         changeTitle("Root View");
 
-        playVideo("https://dlkteeygs75wb.cloudfront.net/2580fe71-2455-4aef-b66b-e841dc35dd3d/hls/ds.m3u8");
+        //playVideo("https://dlkteeygs75wb.cloudfront.net/2580fe71-2455-4aef-b66b-e841dc35dd3d/hls/ds.m3u8");
+        playVideo("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4");
 
 
         //addVideoPlayer();
