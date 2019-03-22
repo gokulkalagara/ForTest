@@ -1,6 +1,7 @@
 package com.maya.testfrost.fragments;
 
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -18,6 +20,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -57,6 +60,7 @@ import com.maya.testfrost.constants.PlayBackSpeed;
 import com.maya.testfrost.constants.VideoPlayerStage;
 import com.maya.testfrost.databinding.VideoPlayerFragmentBinding;
 import com.maya.testfrost.interfaces.fragments.IFragment;
+import com.maya.testfrost.utils.Logger;
 import com.maya.testfrost.utils.Utility;
 
 /**
@@ -173,7 +177,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                 break;
 
             case FLOATING:
-                params = new FrameLayout.LayoutParams(Utility.getScreenWidth(activity()) / 2, Utility.dpSize(activity(), 100));
+                params = new FrameLayout.LayoutParams(Utility.getScreenWidth(activity()) / 2,Utility.getScreenHeight(activity()) / 6);
                 params.setMargins(Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15));
                 params.gravity = Gravity.RIGHT | Gravity.BOTTOM;
 
@@ -198,7 +202,8 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
 
         fragmentBinding.playerView.findViewById(R.id.imgResize).setOnClickListener(v ->
         {
-            if (fragmentBinding.playerView != null) {
+            if (fragmentBinding.playerView != null)
+            {
                 ((ImageView) fragmentBinding.playerView.findViewById(R.id.imgResize)).setImageResource(activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? R.drawable.exo_controls_fullscreen_enter : R.drawable.exo_controls_fullscreen_exit);
                 fragmentBinding.frameLayout.setLayoutParams(new FrameLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         (activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -223,11 +228,12 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         {
             if (fragmentBinding.playerView != null) {
                 if (videoPlayerStage == VideoPlayerStage.STABLE) {
-                    FrameLayout.LayoutParams params1 = new FrameLayout.LayoutParams(Utility.getScreenWidth(activity()) / 2, Utility.dpSize(activity(), 100));
+                    FrameLayout.LayoutParams params1 = new FrameLayout.LayoutParams(Utility.getScreenWidth(activity()) / 2, Utility.getScreenHeight(activity()) / 6);
                     params1.setMargins(Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15), Utility.dpSize(activity(), 15));
                     params1.gravity = Gravity.RIGHT | Gravity.BOTTOM;
-
                     fragmentBinding.frameLayout.setLayoutParams(params1);
+                    fragmentBinding.frameLayout.setPadding(2, 2, 2, 2);
+                    fragmentBinding.frameLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         fragmentBinding.frameLayout.setElevation(8);
                     }
@@ -238,6 +244,8 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                 } else if (videoPlayerStage == VideoPlayerStage.FLOATING) {
                     fragmentBinding.frameLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, Utility.getScreenHeight(activity()) / 3));
                     videoPlayerStage = VideoPlayerStage.STABLE;
+                    fragmentBinding.frameLayout.setBackgroundColor(Color.parseColor("#000000"));
+
                     updateControllers();
                 }
             }
@@ -252,6 +260,141 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         });
 
 
+        fragmentBinding.frameLayout.setOnTouchListener(new View.OnTouchListener() {
+            private float lastX, lastY, previousFX, previousFY;
+
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+
+                if (videoPlayerStage != VideoPlayerStage.FLOATING)
+                    return true;
+
+                if(event.getActionMasked() == MotionEvent.ACTION_DOWN)
+                {
+                    previousFX = fragmentBinding.frameLayout.getX();
+                    previousFY = fragmentBinding.frameLayout.getY();
+
+                    Logger.d("X " + event.getRawX());
+                    Logger.d("Y " + event.getRawY());
+                    Logger.d("FRAME X " + fragmentBinding.frameLayout.getX());
+                    Logger.d("FRAME Y " + fragmentBinding.frameLayout.getY());
+
+
+                    Logger.d("SCREEN WIDTH " + Utility.getScreenWidth(activity()));
+                    Logger.d("PLAYER WIDTH " + fragmentBinding.frameLayout.getWidth());
+
+                    Logger.d("SCREEN HEIGHT " + Utility.getScreenHeight(activity()));
+
+
+                }
+                if (event.getActionMasked() == MotionEvent.ACTION_MOVE)
+                {
+                    float deltaX = event.getRawX() - lastX;
+                    float deltaY = event.getRawY() - lastY;
+
+
+                    Logger.d("deltaX=" + deltaX);
+                    Logger.d("deltaY=" + deltaY);
+
+                    Logger.d("X " + event.getRawX());
+                    Logger.d("Y " + event.getRawY());
+                    Logger.d("FRAME X " + fragmentBinding.frameLayout.getX());
+                    Logger.d("FRAME Y " + fragmentBinding.frameLayout.getY());
+
+
+                    Logger.d("TRANS X " + (deltaX + fragmentBinding.frameLayout.getTranslationX()));
+                    Logger.d("TRANS Y " + (deltaY + fragmentBinding.frameLayout.getTranslationY()));
+                    Logger.d("SCREEN WIDTH " + Utility.getScreenWidth(activity()));
+                    Logger.d("PLAYER WIDTH " + fragmentBinding.frameLayout.getWidth());
+
+                    Logger.d("SCREEN HEIGHT " + Utility.getScreenHeight(activity()));
+
+                    if ((fragmentBinding.frameLayout.getX() > Utility.dpSize(activity(), 15) && (fragmentBinding.frameLayout.getX() + fragmentBinding.frameLayout.getWidth()) < (Utility.getScreenWidth(activity()) - Utility.dpSize(activity(), 15)))
+                            &&
+                            (fragmentBinding.frameLayout.getY() > Utility.dpSize(activity(), 15) && (fragmentBinding.frameLayout.getY() + fragmentBinding.frameLayout.getHeight()) < (Utility.getScreenHeight(activity()) - Utility.dpSize(activity(), 30)))) {
+                        fragmentBinding.frameLayout.setAlpha(1);
+                        fragmentBinding.frameLayout.setTranslationX(deltaX + fragmentBinding.frameLayout.getTranslationX());
+                        fragmentBinding.frameLayout.setTranslationY(deltaY + fragmentBinding.frameLayout.getTranslationY());
+
+                    } else {
+                        fragmentBinding.frameLayout.setTranslationX(deltaX + fragmentBinding.frameLayout.getTranslationX());
+                        fragmentBinding.frameLayout.setTranslationY(deltaY + fragmentBinding.frameLayout.getTranslationY());
+                        fragmentBinding.frameLayout.setAlpha(0.9f);
+
+
+                    }
+
+
+                }
+                else if (event.getActionMasked() == MotionEvent.ACTION_UP)
+                {
+
+                    Logger.d("X " + event.getRawX());
+                    Logger.d("Y " + event.getRawY());
+                    Logger.d("PFRAME X " + previousFX);
+                    Logger.d("PFRAME Y " + previousFY);
+                    Logger.d("FRAME X " + fragmentBinding.frameLayout.getX());
+                    Logger.d("FRAME Y " + fragmentBinding.frameLayout.getY());
+
+
+                    Logger.d("SCREEN WIDTH " + Utility.getScreenWidth(activity()));
+                    Logger.d("PLAYER WIDTH " + fragmentBinding.frameLayout.getWidth());
+
+                    Logger.d("SCREEN HEIGHT " + Utility.getScreenHeight(activity()));
+
+
+                    if((int) previousFX == (int) fragmentBinding.frameLayout.getX() && (int) previousFY == (int)fragmentBinding.frameLayout.getY())
+                    {
+                        fragmentBinding.frameLayout.setAlpha(1);
+                        backToStable();
+                        return true;
+                    }
+
+                    if (fragmentBinding.frameLayout.getX() + fragmentBinding.frameLayout.getWidth() / 2 > Utility.getScreenWidth(activity())) {
+                        activity().onBackPressed();
+                    } else if (fragmentBinding.frameLayout.getX() < -fragmentBinding.frameLayout.getWidth() / 2) {
+                        activity().onBackPressed();
+
+                    } else if (fragmentBinding.frameLayout.getY() + fragmentBinding.frameLayout.getHeight() / 2 > Utility.getScreenHeight(activity()) - Utility.dpSize(activity(), 15)) {
+                        activity().onBackPressed();
+
+                    } else if (fragmentBinding.frameLayout.getY() < -fragmentBinding.frameLayout.getHeight() / 2) {
+                        activity().onBackPressed();
+
+                    } else {
+
+                    }
+                    fragmentBinding.frameLayout.setAlpha(1);
+                    if (fragmentBinding.frameLayout.getX() + (fragmentBinding.frameLayout.getWidth() / 2) > (Utility.getScreenWidth(activity()) / 2)) {
+                        ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.X, fragmentBinding.frameLayout.getX(), Utility.getScreenWidth(activity()) - Utility.dpSize(activity(), 15) - fragmentBinding.frameLayout.getWidth()).setDuration(100).start();
+                    } else {
+                        ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.X, fragmentBinding.frameLayout.getX(), Utility.dpSize(activity(), 15)).setDuration(100).start();
+                    }
+
+                    if (fragmentBinding.frameLayout.getY() + fragmentBinding.frameLayout.getHeight() > (Utility.getScreenHeight(activity()) - Utility.dpSize(activity(), 30))) {
+                        ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.Y, fragmentBinding.frameLayout.getY(), Utility.getScreenHeight(activity()) - Utility.dpSize(activity(), 40) - fragmentBinding.frameLayout.getHeight()).setDuration(100).start();
+                    } else if (fragmentBinding.frameLayout.getY() < Utility.dpSize(activity(), 15)) {
+                        ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.Y, fragmentBinding.frameLayout.getY(), Utility.dpSize(activity(), 15)).setDuration(100).start();
+                    }
+
+
+
+                }
+
+
+                lastX = event.getRawX();
+                lastY = event.getRawY();
+
+
+                return true;
+
+
+            }
+        });
+
+
     }
 
 
@@ -260,8 +403,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             return;
         }
 
-        if (player != null && !isRetry)
-        {
+        if (player != null && !isRetry) {
             return;
         }
         isRetry = false;
@@ -282,6 +424,11 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         fragmentBinding.playerView.setPlayer(player);
         player.setPlayWhenReady(shouldAutoPlay);
         MediaSource mediaSource = buildMediaSource(uri);
+
+        if(videoPlayerStage==VideoPlayerStage.FLOATING)
+        {
+            fragmentBinding.playerView.setUseController(false);
+        }
 
 
         int result = mAudioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
@@ -313,10 +460,8 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             }
 
             @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState)
-            {
-                switch (playbackState)
-                {
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                switch (playbackState) {
                     case Player.STATE_IDLE:
                         fragmentBinding.progressBar.setVisibility(View.GONE);
                         break;
@@ -325,8 +470,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                         break;
                     case Player.STATE_READY:
                         fragmentBinding.progressBar.setVisibility(View.GONE);
-                        if (player.getPlayWhenReady())
-                        {
+                        if (player.getPlayWhenReady()) {
                             mAudioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
                             mAudioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_SYSTEM, AudioManager.AUDIOFOCUS_GAIN);
                         }
@@ -359,10 +503,9 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             }
 
             @Override
-            public void onPlayerError(ExoPlaybackException error)
-            {
+            public void onPlayerError(ExoPlaybackException error) {
                 error.printStackTrace();
-                Log.d("ERROR",error.getMessage());
+                Log.d("PLAYER_ERROR", error.getMessage());
                 playbackPosition = player.getCurrentPosition();
                 currentWindow = player.getCurrentWindowIndex();
                 fragmentBinding.progressBar.setVisibility(View.GONE);
@@ -384,6 +527,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             public void onSeekProcessed() {
             }
         });
+
 
     }
 
@@ -486,13 +630,11 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     @Override
     public void onResume() {
         super.onResume();
-        fragmentBinding.playerView.setUseController(true);
 
         if (player == null) {
             initializePlayer();
         }
-        if (videoPlayerStage == VideoPlayerStage.PIP)
-        {
+        if (videoPlayerStage == VideoPlayerStage.PIP) {
             //backToNormal();
         }
         mAudioManager.registerMediaButtonEventReceiver(mRemoteControlResponder);
@@ -515,15 +657,12 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             playbackPosition = player.getCurrentPosition();
             currentWindow = player.getCurrentWindowIndex();
 
-            if (Util.SDK_INT <= 23)
-            {
+            if (Util.SDK_INT <= 23) {
                 releasePlayer();
-            }
-            else if(Util.SDK_INT >= Build.VERSION_CODES.O)
+            } else if (Util.SDK_INT >= Build.VERSION_CODES.O)
             {
 
-            }
-            else {
+            } else {
                 shouldAutoPlay = false;
                 player.setPlayWhenReady(false);
             }
@@ -542,14 +681,11 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
     @Override
-    public void onStop()
-    {
+    public void onStop() {
         super.onStop();
         if (player == null) {
 
-        }
-        else
-        {
+        } else {
             pausePlayer();
             if (Util.SDK_INT <= 23) {
                 releasePlayer();
@@ -571,9 +707,8 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
     @Override
-    public void showSnackBar(String snackBarText, int type)
-    {
-        Utility.showSnackBar(activity(),fragmentBinding.frameLayout,snackBarText,type);
+    public void showSnackBar(String snackBarText, int type) {
+        Utility.showSnackBar(activity(), fragmentBinding.frameLayout, snackBarText, type);
     }
 
     @Override
@@ -582,9 +717,42 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     }
 
 
-    public void backToNormal()
+
+    public void backToStable()
     {
+        fragmentBinding.frameLayout.setBackgroundColor(Color.parseColor("#000000"));
+        fragmentBinding.frameLayout.setPadding(0,0,0,0);
+
+        if(videoPlayerStage!=VideoPlayerStage.FLOATING)
+        {
+            ((ImageView) fragmentBinding.playerView.findViewById(R.id.imgResize)).setImageResource(activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? R.drawable.exo_controls_fullscreen_enter : R.drawable.exo_controls_fullscreen_exit);
+            fragmentBinding.frameLayout.setLayoutParams(new FrameLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    (activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                            ? LinearLayout.LayoutParams.MATCH_PARENT : Utility.getScreenWidth(activity()) / 3)));
+            activity().setRequestedOrientation(activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            videoPlayerStage = activity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? VideoPlayerStage.FULL_SCREEN : VideoPlayerStage.STABLE;
+            decorateScreenUi();
+            updateControllers();
+        }
+        else
+        {
+            fragmentBinding.frameLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, Utility.getScreenHeight(activity()) / 3));
+            ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.TRANSLATION_X, 0).setDuration(0).start();
+            ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.TRANSLATION_Y, 0).setDuration(0).start();
+            videoPlayerStage = VideoPlayerStage.STABLE;
+            updateControllers();
+        }
+
+    }
+
+
+    public void backToNormal() {
         videoPlayerStage = previousPlayerStage;
+        if (previousPlayerStage == VideoPlayerStage.FLOATING) {
+            fragmentBinding.playerView.setUseController(false);
+        } else {
+            fragmentBinding.playerView.setUseController(true);
+        }
         fragmentBinding.frameLayout.setLayoutParams(params);
         decorateScreenUi();
     }
@@ -598,6 +766,11 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         videoPlayerStage = VideoPlayerStage.PIP;
         params = (FrameLayout.LayoutParams) fragmentBinding.frameLayout.getLayoutParams();
         fragmentBinding.frameLayout.setLayoutParams(new FrameLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        if(previousPlayerStage==VideoPlayerStage.FLOATING)
+        {
+            ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.TRANSLATION_X, 0).setDuration(0).start();
+            ObjectAnimator.ofFloat(fragmentBinding.frameLayout, View.TRANSLATION_Y, 0).setDuration(0).start();
+        }
         fragmentBinding.playerView.setUseController(false);
     }
 
@@ -606,6 +779,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         RelativeLayout.LayoutParams params = null;
         switch (videoPlayerStage) {
             case STABLE:
+                fragmentBinding.playerView.setUseController(true);
                 fragmentBinding.playerView.findViewById(R.id.llFrd).setVisibility(View.VISIBLE);
                 fragmentBinding.playerView.findViewById(R.id.llRew).setVisibility(View.VISIBLE);
                 fragmentBinding.playerView.findViewById(R.id.llBottomContent).setVisibility(View.VISIBLE);
@@ -641,6 +815,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                 break;
 
             case FULL_SCREEN:
+                fragmentBinding.playerView.setUseController(true);
                 fragmentBinding.playerView.findViewById(R.id.llFrd).setVisibility(View.VISIBLE);
                 fragmentBinding.playerView.findViewById(R.id.llRew).setVisibility(View.VISIBLE);
                 fragmentBinding.playerView.findViewById(R.id.llBottomContent).setVisibility(View.VISIBLE);
@@ -672,6 +847,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
                 break;
 
             case FLOATING:
+                fragmentBinding.playerView.setUseController(false);
                 fragmentBinding.playerView.findViewById(R.id.llFrd).setVisibility(View.GONE);
                 fragmentBinding.playerView.findViewById(R.id.llRew).setVisibility(View.GONE);
                 fragmentBinding.playerView.findViewById(R.id.llBottomContent).setVisibility(View.GONE);
@@ -867,5 +1043,12 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
 
                 }
             };
+
+
+
+    public VideoPlayerStage getVideoPlayerStage()
+    {
+        return videoPlayerStage;
+    }
 
 }

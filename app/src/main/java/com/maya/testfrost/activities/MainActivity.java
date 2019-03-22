@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
 
+
     @BindView(R.id.toolbar)
     android.support.v7.widget.Toolbar toolbar;
 
@@ -220,8 +221,6 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
             {
                 if (!isInPictureInPictureMode())
                 {
-                    VideoPlayerFragment videoPlayerFragment = (VideoPlayerFragment)  getSupportFragmentManager().getFragments().get(0);
-                    videoPlayerFragment.backToPIP();
                     PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
                     enterPictureInPictureMode(pictureInPictureParamsBuilder.build());
                 }
@@ -243,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
                 {
 
                     final VideoPlayerFragment mediaFragment = (VideoPlayerFragment) getSupportFragmentManager().getFragments().get(0);
+                    mediaFragment.backToPIP();
                     if(mediaFragment.player==null) return;
                     setAction(mediaFragment.player.getPlayWhenReady());
                     // action
@@ -317,6 +317,7 @@ public class MainActivity extends AppCompatActivity implements IActivity, IRootA
 
         //playVideo("https://dlkteeygs75wb.cloudfront.net/2580fe71-2455-4aef-b66b-e841dc35dd3d/hls/ds.m3u8");
         playVideo("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4");
+        //playVideo("https://res.cloudinary.com/chinna972/video/upload/v1552977744/Android_Jetpack-_Introducing_Navigation_Component.mp4");
 
 
         //addVideoPlayer();
