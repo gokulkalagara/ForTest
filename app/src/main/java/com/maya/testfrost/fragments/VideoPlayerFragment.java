@@ -17,6 +17,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -63,6 +65,8 @@ import com.maya.testfrost.interfaces.fragments.IFragment;
 import com.maya.testfrost.utils.Logger;
 import com.maya.testfrost.utils.Utility;
 
+import static android.content.Context.TELEPHONY_SERVICE;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link VideoPlayerFragment#newInstance} factory method to
@@ -100,6 +104,7 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     private UsbDetectorReceiver usbDetectorReceiver;
     private boolean isRetry = false;
     public static IHeadSetsController iHeadSetsController;
+    private TelephonyManager telephonyManager;
 
 
     public VideoPlayerFragment() {
@@ -150,6 +155,8 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         iHeadSetsController = this;
         mAudioManager = (AudioManager) activity().getSystemService(Context.AUDIO_SERVICE);
         mRemoteControlResponder = new ComponentName(activity().getPackageName(), HeadSetActionReceiver.class.getName());
+        telephonyManager = (TelephonyManager) activity().getSystemService(TELEPHONY_SERVICE);
+
     }
 
     @Override
@@ -640,6 +647,9 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
         mAudioManager.registerMediaButtonEventReceiver(mRemoteControlResponder);
         activity().registerReceiver(mediaReceiver = new MediaReceiver(), new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
         activity().registerReceiver(usbDetectorReceiver = new UsbDetectorReceiver(), new IntentFilter("android.hardware.usb.action.USB_STATE"));
+        if (telephonyManager != null) {
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
         decorateScreenUi();
     }
 
@@ -690,6 +700,10 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
             if (Util.SDK_INT <= 23) {
                 releasePlayer();
             }
+        }
+
+        if (telephonyManager != null) {
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
 
     }
@@ -1050,5 +1064,21 @@ public class VideoPlayerFragment extends Fragment implements IFragment, ISpeedCo
     {
         return videoPlayerStage;
     }
+
+    private PhoneStateListener phoneStateListener = new PhoneStateListener() {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            if (state == TelephonyManager.CALL_STATE_RINGING) {
+                //Incoming call
+                pausePlayer();
+            } else if (state == TelephonyManager.CALL_STATE_IDLE) {
+                //Not in call
+            } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                //A call is dialing, active or on hold
+                pausePlayer();
+            }
+            super.onCallStateChanged(state, incomingNumber);
+        }
+    };
 
 }

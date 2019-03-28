@@ -1,5 +1,6 @@
 package com.maya.testfrost.fragments;
 
+import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,11 @@ public class HeadSetActionReceiver extends BroadcastReceiver {
             return;
         }
 
+        KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+
+        if (keyguardManager.inKeyguardRestrictedInputMode()) {
+            return;
+        }
 
         if(event.getKeyCode() ==  KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
         {
